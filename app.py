@@ -537,9 +537,11 @@ Problems:
                     else:
                         # Send entire document as context
                         with st.spinner("Generating answer from LLM..."):
+                            # Simulate limited context window
+                            partial_document = text[:5000]
                             answer = generate_answer_with_llama(
                                 user_question,
-                                [text],  # Send entire document as single context
+                                [partial_document],  # Send entire document as single context
                                 llama_model,
                                 ollama_url,
                             )
