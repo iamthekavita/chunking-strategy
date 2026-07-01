@@ -204,9 +204,7 @@ with left_col:
         "Chunking Strategy",
         [
             "Index (equal slices)",
-            "Paragraph (natural paragraphs)",
-            "Fixed-size (short chunks)",
-            "Fixed-size (long chunks)"
+            "Paragraph (natural paragraphs)"
         ],
         index=0,
     )
@@ -302,20 +300,6 @@ def create_chunks(text: str, overlap_words: int, strategy: str) -> List[str]:
         if not paras:
             paras = [p.strip() for p in text.split("\n") if p.strip()]
         return paras
-
-    # Fixed-size strategies decide chunk size, not chunk count.
-    if strategy.startswith("Fixed-size"):
-        if "short" in strategy.lower():
-            preferred = 200
-        else:
-            preferred = 800
-        chunks = []
-        i = 0
-        while i < len(words):
-            chunk = " ".join(words[i : i + preferred])
-            chunks.append(chunk)
-            i += preferred - overlap_words if overlap_words > 0 else preferred
-        return chunks
 
     # Index strategy uses evenly sized windows with a fixed target size.
     base = 400
@@ -550,31 +534,6 @@ Problems:
 
             else:
                 # CHUNKING MODE
-                st.success(f"""
-✅ Chunking Completed
-
-Chunks Created: {num_chunks}
-
-Overlap Words: {overlap_words}
-""")
-                st.info(
-                    """
-### Why Chunking Helps
-
-• Better Retrieval
-
-• Better Recall
-
-• Better Precision
-
-• Lower Token Usage
-
-• Improved Answers
-"""
-                )
-
-                st.divider()
-
                 # create chunks and measure
                 t_chunk_start = time.perf_counter()
                 st.session_state.chunks = create_chunks(text, overlap_words, chunk_strategy)
@@ -605,6 +564,31 @@ Overlap Words: {overlap_words}
                     st.session_state.retriever_key = None
                     st.warning(f"Embedding generation failed: {exc}")
                 t_chunk = time.perf_counter() - t_chunk_start
+
+                st.success(f"""
+✅ Chunking Completed
+
+Chunks Created: {len(st.session_state.chunks)}
+
+Overlap Words: {overlap_words}
+""")
+                st.info(
+                    """
+### Why Chunking Helps
+
+• Better Retrieval
+
+• Better Recall
+
+• Better Precision
+
+• Lower Token Usage
+
+• Improved Answers
+"""
+                )
+
+                st.divider()
 
                 # show chunk dropdown and content
                 st.subheader("📄 Created Chunks")
